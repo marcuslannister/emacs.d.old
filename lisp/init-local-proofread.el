@@ -13,77 +13,77 @@
 
 (require 'auth-source)
 
-(defvar ml-proofread-checker-name 'default
+(defvar my/proofread-checker-name 'default
   "Symbol that identifies the checker inside proofread.")
 
-(defvar ml-proofread-endpoint-url nil
+(defvar my/proofread-endpoint-url nil
   "Base URL of the OpenAI-compatible endpoint, with a trailing slash.
 `llm' appends the command itself, so this stops before the command:
 use \"https://example.test/v1/\", not \".../v1/chat/completions\".")
 
-(defvar ml-proofread-auth-host nil
+(defvar my/proofread-auth-host nil
   "Value of the `:host' field that carries the API key in ~/.authinfo.")
 
-(defvar ml-proofread-auth-user "apikey"
+(defvar my/proofread-auth-user "apikey"
   "Value of the `:user' field that carries the API key in ~/.authinfo.")
 
-(defvar ml-proofread-chat-model nil
-  "Name of the model to request from `ml-proofread-endpoint-url'.")
+(defvar my/proofread-chat-model nil
+  "Name of the model to request from `my/proofread-endpoint-url'.")
 
-(defvar ml-proofread-provider-identity nil
+(defvar my/proofread-provider-identity nil
   "Provider identity string recorded on each proofread result.")
 
-(defvar ml-proofread-source-label nil
+(defvar my/proofread-source-label nil
   "Human-readable label shown for results from this checker.")
 
-(defvar ml-proofread-chat-params nil
+(defvar my/proofread-chat-params nil
   "Alist of non-standard chat parameters to send with every request.
 Only a model that needs a special route or reasoning effort sets this;
 leave nil for a model that takes the standard chat parameters.")
 
-(defvar ml-proofread-model-metadata nil
+(defvar my/proofread-model-metadata nil
   "Plist of `llm-models-add' arguments to register the configured model.
-Set this only when `llm' does not already know `ml-proofread-chat-model';
+Set this only when `llm' does not already know `my/proofread-chat-model';
 leave nil when the model is already registered upstream.")
 
 (require 'init-local-proofread-config nil t)
 
-(defun ml-proofread--ensure-model-metadata ()
-  "Register `ml-proofread-model-metadata' when `llm' does not know the model."
-  (when (and ml-proofread-model-metadata
-             (not (llm-models-match ml-proofread-chat-model)))
-    (apply #'llm-models-add ml-proofread-model-metadata)))
+(defun my/proofread--ensure-model-metadata ()
+  "Register `my/proofread-model-metadata' when `llm' does not know the model."
+  (when (and my/proofread-model-metadata
+             (not (llm-models-match my/proofread-chat-model)))
+    (apply #'llm-models-add my/proofread-model-metadata)))
 
-(defun ml-proofread--provider (model params)
+(defun my/proofread--provider (model params)
   "Build an `llm' provider that reaches MODEL over the private endpoint.
 PARAMS is an alist of non-standard chat parameters; see
-`ml-proofread-chat-params'."
+`my/proofread-chat-params'."
   (make-llm-openai-compatible
-   :url ml-proofread-endpoint-url
+   :url my/proofread-endpoint-url
    ;; llm resolves a function-valued `:key' at request time, so ~/.authinfo is
    ;; read on first check and the secret never lands in the provider struct.
    :key (lambda ()
           (auth-source-pick-first-password
-           :host ml-proofread-auth-host
-           :user ml-proofread-auth-user))
+           :host my/proofread-auth-host
+           :user my/proofread-auth-user))
    :chat-model model
    :default-chat-non-standard-params params))
 
-(defun ml-proofread--checker ()
+(defun my/proofread--checker ()
   "Build the proofread checker from the private endpoint settings."
-  `( :name ,ml-proofread-checker-name
+  `( :name ,my/proofread-checker-name
      :backend llm
-     :options ( :provider ,(ml-proofread--provider
-                            ml-proofread-chat-model
-                            ml-proofread-chat-params)
-                :provider-identity ,ml-proofread-provider-identity
-                :source-label ,ml-proofread-source-label
+     :options ( :provider ,(my/proofread--provider
+                            my/proofread-chat-model
+                            my/proofread-chat-params)
+                :provider-identity ,my/proofread-provider-identity
+                :source-label ,my/proofread-source-label
                 :response-strategy auto
                 :diagnostic-passes 1)))
 
 ;; Everything below is optional tooling, so nothing is loaded or installed
 ;; until the private config proves there is an endpoint to talk to.
-(when (and ml-proofread-endpoint-url ml-proofread-chat-model)
+(when (and my/proofread-endpoint-url my/proofread-chat-model)
   ;; Proofread is registered in lisp/package-list.el, but async-installer only
   ;; extends `load-path' during install postprocess, so — as with anvil — the
   ;; directory has to be re-added on every startup.
@@ -99,14 +99,14 @@ PARAMS is an alist of non-standard chat parameters; see
   (when (and (maybe-require-package 'llm)
              (require 'llm-openai nil t)
              (require 'proofread nil t))
-    (ml-proofread--ensure-model-metadata)
+    (my/proofread--ensure-model-metadata)
     (setq proofread-profiles
           `((english . ( :language "en"
                          :display-language "English"
-                         :checkers (,(ml-proofread--checker))))))
+                         :checkers (,(my/proofread--checker))))))
     (setq proofread-profile 'english))
 
-  ;; C-c g p (ml-llm-proof) exists only when llm loaded.
+  ;; C-c g p (my/llm-proof) exists only when llm loaded.
   (unless (featurep 'llm)
     (display-warning 'init-local-proofread "llm missing: C-c g p is dead")))
 

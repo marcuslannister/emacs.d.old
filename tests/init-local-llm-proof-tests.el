@@ -11,9 +11,9 @@
 (provide 'llm)
 (provide 'llm-openai)
 
-(defvar ml-proofread-chat-model "google/gemini-3.7-flash")
-(defvar ml-proofread-chat-params '((provider . ((order . ["a-route"])))))
-(defun ml-proofread--provider (model params)
+(defvar my/proofread-chat-model "google/gemini-3.7-flash")
+(defvar my/proofread-chat-params '((provider . ((order . ["a-route"])))))
+(defun my/proofread--provider (model params)
   (list 'provider model params))
 (provide 'init-local-proofread)
 
@@ -32,7 +32,7 @@
         (goto-char (point-max))
         (activate-mark)
         (let ((transient-mark-mode t))
-          (ml-llm-proof (region-beginning) (region-end) aggressive))))
+          (my/llm-proof (region-beginning) (region-end) aggressive))))
     request))
 
 (ert-deftest init-local-llm-proof-uses-the-private-provider ()
@@ -42,11 +42,11 @@
                               ((provider . ((order . ["a-route"])))))))
     (should (equal (nth 1 request)
                    (list 'prompt "Please improve this sentence."
-                         ml-llm-proof-gentle-prompt)))))
+                         my/llm-proof-gentle-prompt)))))
 
 (ert-deftest init-local-llm-proof-keeps-the-shared-params-for-another-model ()
-  "A different config model still sends `ml-proofread-chat-params'."
-  (let* ((ml-llm-proof-model "other/model")
+  "A different config model still sends `my/proofread-chat-params'."
+  (let* ((my/llm-proof-model "other/model")
          (request (init-local-llm-proof-tests--request)))
     (should (equal (nth 0 request)
                    '(provider "other/model"
@@ -63,19 +63,19 @@
       (activate-mark)
       (cl-letf (((symbol-function 'llm-chat-async) #'ignore))
         (let ((transient-mark-mode t))
-          (ml-llm-proof (region-beginning) (region-end))))
+          (my/llm-proof (region-beginning) (region-end))))
       (goto-char (point-min))
       (should (search-forward "\n\n=======\n" nil t)))))
 
 (ert-deftest init-local-llm-proof-polishes-with-a-prefix-argument ()
   (let ((request (init-local-llm-proof-tests--request t)))
-    (should (equal (nth 2 (nth 1 request)) ml-llm-proof-aggressive-prompt))))
+    (should (equal (nth 2 (nth 1 request)) my/llm-proof-aggressive-prompt))))
 
 (defun init-local-llm-proof-tests--placeholder (before after)
   "Insert BEFORE, the placeholder, and AFTER, and return its two markers."
   (insert before)
   (let ((beg (point-marker)))
-    (insert ml-llm-proof-placeholder)
+    (insert my/llm-proof-placeholder)
     (let ((end (point-marker)))
       (insert after)
       (list beg end))))
@@ -83,7 +83,7 @@
 (ert-deftest init-local-llm-proof-replaces-the-placeholder ()
   (with-temp-buffer
     (let ((place (init-local-llm-proof-tests--placeholder "before " " after")))
-      (ml-llm-proof-apply-fix (current-buffer) (nth 0 place) (nth 1 place)
+      (my/llm-proof-apply-fix (current-buffer) (nth 0 place) (nth 1 place)
                               "corrected")
       (should (equal (buffer-string) "before corrected after")))))
 
@@ -93,7 +93,7 @@
     (let ((place (init-local-llm-proof-tests--placeholder "before " " after")))
       (goto-char (point-min))
       (insert "TYPED WHILE WAITING\n")
-      (ml-llm-proof-apply-fix (current-buffer) (nth 0 place) (nth 1 place)
+      (my/llm-proof-apply-fix (current-buffer) (nth 0 place) (nth 1 place)
                               "corrected")
       (should (equal (buffer-string)
                      "TYPED WHILE WAITING\nbefore corrected after")))))
@@ -105,7 +105,7 @@
       (setq buffer (current-buffer))
       (setq place (init-local-llm-proof-tests--placeholder "before " " after")))
     (should-not (buffer-live-p buffer))
-    (ml-llm-proof-apply-fix buffer (nth 0 place) (nth 1 place) "corrected")))
+    (my/llm-proof-apply-fix buffer (nth 0 place) (nth 1 place) "corrected")))
 
 (ert-deftest init-local-llm-proof-colours-what-changed ()
   "The words that differ carry a smerge refinement face."
@@ -113,7 +113,7 @@
     (let ((place (init-local-llm-proof-tests--placeholder
                   "<<<<<<< Original\nI have discussed the plan.\n\n=======\n"
                   "\n>>>>>>> Proofread (gentle)\n")))
-      (ml-llm-proof-apply-fix (current-buffer) (nth 0 place) (nth 1 place)
+      (my/llm-proof-apply-fix (current-buffer) (nth 0 place) (nth 1 place)
                               "I discussed the plan.")
       (should (member 'smerge-refined-removed
                       (mapcar (lambda (o) (overlay-get o 'font-lock-face))

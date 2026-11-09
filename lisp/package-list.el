@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 ;; Bumping anvil (Mac/Linux): edit the `:tag' below, then
-;;   1. M-x ml-update-all-packages  -- reads the new tag, fetches and checks
+;;   1. M-x my/update-all-packages  -- reads the new tag, fetches and checks
 ;;      it out, rewrites the .gitcommit cache, native-compiles, and refreshes
 ;;      ~/.emacs.d/anvil-stdio.sh (the per-machine MCP stdio bridge)
 ;;   2. restart Emacs and reconnect the MCP client

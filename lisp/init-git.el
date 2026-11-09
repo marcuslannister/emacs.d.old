@@ -74,13 +74,13 @@
   :after magit
   :bind
   (:map magit-status-mode-map
-   ("<return>" . my-magit-fast-diff))
+   ("<return>" . my/magit-fast-diff))
   :init
   (remove-hook 'server-switch-hook 'magit-commit-diff)
   (remove-hook 'magit-pre-start-git-hook #'magit-maybe-save-repository-buffers)
   (magit-fast-mode)
 
-  (defun my-magit-fast-diff ()
+  (defun my/magit-fast-diff ()
     (interactive)
     (when-let* ((file (magit-file-at-point)))
       (magit-diff-dwim nil `(,file)))))

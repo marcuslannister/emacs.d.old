@@ -4,7 +4,7 @@
 
 (require 'cl-lib)
 
-(defun ml/eshell--script-for-os (base)
+(defun my/eshell--script-for-os (base)
   "Return the eshell script path for BASE, preferring OS-specific files."
   (let* ((dir (expand-file-name "eshell" user-emacs-directory))
          (suffix (cond (IS-MAC "mac")
@@ -17,8 +17,8 @@
      ((file-readable-p fallback) fallback)
      (t nil))))
 
-(let ((rc (ml/eshell--script-for-os "profile"))
-      (login (ml/eshell--script-for-os "login")))
+(let ((rc (my/eshell--script-for-os "profile"))
+      (login (my/eshell--script-for-os "login")))
   (when rc
     (setq eshell-rc-script rc))
   (when login
@@ -26,7 +26,7 @@
 
 
 ;; Vim-style navigation + selection for ghostel copy mode (tmux copy-mode-vi
-;; feel).  Hel is disabled in copy mode (see `ml/ghostel-sync-hel') so these
+;; feel).  Hel is disabled in copy mode (see `my/ghostel-sync-hel') so these
 ;; keys are free.  A minor-mode map outranks ghostel's read-only/fast-exit local
 ;; map, so h/j/k/l move point instead of tripping fast-exit.  Reuses ghostel's
 ;; own commands: `ghostel-readonly-copy' both copies the region and exits
@@ -37,7 +37,7 @@
 (declare-function ghostel-readonly-exit "ghostel")
 (declare-function ghostel "ghostel")
 
-(defun ml/ghostel-split-new ()
+(defun my/ghostel-split-new ()
   "Split right and open a fresh, auto-numbered Ghostel terminal there."
   (interactive)
   (select-window (split-window-right))
@@ -47,7 +47,7 @@
 
 ;; Built with `make-sparse-keymap'/`define-key' (not `defvar-keymap', Emacs
 ;; 29.1+) so this file still loads on the 27.1 floor declared in `init.el'.
-(defvar ml/ghostel-copy-vi-mode-map
+(defvar my/ghostel-copy-vi-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "h")        #'backward-char)
     (define-key map (kbd "j")        #'next-line)
@@ -65,37 +65,37 @@
     (define-key map (kbd "q")        #'ghostel-readonly-exit)
     (define-key map (kbd "C-g")      #'ghostel-readonly-exit)
     map)
-  "Keymap for `ml/ghostel-copy-vi-mode'.")
+  "Keymap for `my/ghostel-copy-vi-mode'.")
 
-(define-minor-mode ml/ghostel-copy-vi-mode
+(define-minor-mode my/ghostel-copy-vi-mode
   "Tmux-style vi navigation and selection for ghostel copy mode.
 Move with h/j/k/l (w/b words, 0/$ line, g/G buffer), press SPC to
 start selecting, keep moving to extend, RET to copy and exit, q or
 C-g to cancel."
-  :keymap ml/ghostel-copy-vi-mode-map)
+  :keymap my/ghostel-copy-vi-mode-map)
 
 ;; Hel conflicts with ghostel's terminal-input modes; the ghostel setup below
 ;; runs this helper after each input-mode change.
-(defun ml/ghostel-sync-hel (&rest _)
+(defun my/ghostel-sync-hel (&rest _)
   "Sync editing modes to ghostel's input mode.
 In semi-char/char modes Hel swallows ESC and the leader key, so the
 terminal misses keys -- disable it.  In emacs mode the buffer is
 read-only, so Hel's space leader is what we want when available.  In copy mode use
-`ml/ghostel-copy-vi-mode' (tmux-style hjkl select) instead of Hel."
+`my/ghostel-copy-vi-mode' (tmux-style hjkl select) instead of Hel."
   (when (derived-mode-p 'ghostel-mode)
     ;; Do not add Emacs's red underline to terminal nonbreaking spaces.
     (setq-local nobreak-char-display nil)
     (pcase ghostel--input-mode
       ('emacs
-       (ml/ghostel-copy-vi-mode -1)
+       (my/ghostel-copy-vi-mode -1)
        (when (fboundp 'hel-local-mode)
          (hel-local-mode 1)))
       ('copy
        (when (fboundp 'hel-local-mode)
          (hel-local-mode -1))
-       (ml/ghostel-copy-vi-mode 1))
+       (my/ghostel-copy-vi-mode 1))
       (_
-       (ml/ghostel-copy-vi-mode -1)
+       (my/ghostel-copy-vi-mode -1)
        (when (fboundp 'hel-local-mode)
          (hel-local-mode -1))))
     ;; Mode changes can replace the cursor without changing windows.
@@ -110,7 +110,7 @@ read-only, so Hel's space leader is what we want when available.  In copy mode u
 ;; `ghostel-kitty-unsupported-source-rect' errors.  A non-zero SRC-X/SRC-Y
 ;; is the only atlas-crop signal available here without decoding the
 ;; source image's native dimensions, so use that instead.
-(defun ml/ghostel-kitty-check-source-rect (src-x src-y src-w src-h pixel-w pixel-h)
+(defun my/ghostel-kitty-check-source-rect (src-x src-y src-w src-h pixel-w pixel-h)
   "Signal `ghostel-kitty-unsupported-source-rect' only for a true atlas crop.
 SRC-X / SRC-Y / SRC-W / SRC-H / PIXEL-W / PIXEL-H match
 `ghostel--kitty-check-source-rect', which this overrides."
@@ -125,22 +125,22 @@ SRC-X / SRC-Y / SRC-W / SRC-H / PIXEL-W / PIXEL-H match
 ;; ghostel is silently dropped.  A real focus click lands within milliseconds of
 ;; its focus-in with no command between, so drop the flag on any other command
 ;; and honor it only while it is fresh.
-(defvar ml/ghostel--focus-change-time 0.0
+(defvar my/ghostel--focus-change-time 0.0
   "`float-time' of the last frame focus change.")
 
-(defun ml/ghostel-stamp-focus-change (&rest _)
+(defun my/ghostel-stamp-focus-change (&rest _)
   "Record the time of a frame focus change."
-  (setq ml/ghostel--focus-change-time (float-time)))
+  (setq my/ghostel--focus-change-time (float-time)))
 
-(defun ml/ghostel-expire-focus-flag (event &rest _)
+(defun my/ghostel-expire-focus-flag (event &rest _)
   "Clear a stale refocus flag before ghostel handles the press EVENT."
-  (let ((age (- (float-time) ml/ghostel--focus-change-time)))
+  (let ((age (- (float-time) my/ghostel--focus-change-time)))
     ;; Negative age: the wall clock moved back, so the stamp is not fresh.
     (when (or (< age 0) (> age 0.5))
       (set-frame-parameter (window-frame (posn-window (event-start event)))
                            'ghostel--frame-refocused nil))))
 
-(defun ml/ghostel-drop-focus-flag ()
+(defun my/ghostel-drop-focus-flag ()
   "Clear refocus flags when a command other than the ghostel press runs."
   (unless (memq this-command '(ghostel-mouse-press-or-copy-mode
                                handle-switch-frame handle-focus-in
@@ -149,7 +149,7 @@ SRC-X / SRC-Y / SRC-W / SRC-H / PIXEL-W / PIXEL-H match
       (when (frame-parameter frame 'ghostel--frame-refocused)
         (set-frame-parameter frame 'ghostel--frame-refocused nil)))))
 
-(defun ml/ghostel-smart-paste ()
+(defun my/ghostel-smart-paste ()
   "Paste clipboard text, or send Ctrl+V when the clipboard has an image.
 Images take priority when the clipboard offers both image and text formats."
   (interactive)
@@ -160,18 +160,18 @@ Images take priority when the clipboard offers both image and text formats."
       (ghostel-send-key "v" "ctrl")
     (ghostel-yank)))
 
-(defun ml/ghostel-bind-terminal-keys (&rest _)
+(defun my/ghostel-bind-terminal-keys (&rest _)
   "Bind Ghostel terminal-input keys, including after semi-char map rebuilds.
 A rebuild makes `ghostel-semi-char-mode-map' again from
 `ghostel-keymap-exceptions' and drops `use-package' :bind keys."
   (pcase-dolist (`(,key . ,cmd) '(("M-c" . ghostel-copy-mode)
                                   ("M-e" . ghostel-emacs-mode)
-                                  ("M-t" . ml/ghostel-split-new)))
+                                  ("M-t" . my/ghostel-split-new)))
     (define-key ghostel-semi-char-mode-map (kbd key) cmd))
   (dolist (map (list ghostel-semi-char-mode-map ghostel-char-mode-map))
     ;; Karabiner maps physical Ctrl+V to Cmd+V on macOS.
     (dolist (key '("C-v" "s-v"))
-      (define-key map (kbd key) #'ml/ghostel-smart-paste))))
+      (define-key map (kbd key) #'my/ghostel-smart-paste))))
 
 ;; M-1..M-9 select tab-bar tabs globally (see `init-local.el').  Ghostel's
 ;; semi-char mode binds every M-<printable> to the terminal, so those keys never
@@ -190,16 +190,16 @@ A rebuild makes `ghostel-semi-char-mode-map' again from
      (append ghostel-keymap-exceptions
              (seq-remove (lambda (key) (member key ghostel-keymap-exceptions))
                          keys))))
-  (ml/ghostel-bind-terminal-keys)
+  (my/ghostel-bind-terminal-keys)
   (advice-add 'ghostel--rebuild-semi-char-keymap
-              :after #'ml/ghostel-bind-terminal-keys)
+              :after #'my/ghostel-bind-terminal-keys)
   (when (fboundp 'ghostel--kitty-check-source-rect)
     (advice-add 'ghostel--kitty-check-source-rect
-                :override #'ml/ghostel-kitty-check-source-rect))
-  (add-function :after after-focus-change-function #'ml/ghostel-stamp-focus-change)
-  (add-hook 'pre-command-hook #'ml/ghostel-drop-focus-flag)
+                :override #'my/ghostel-kitty-check-source-rect))
+  (add-function :after after-focus-change-function #'my/ghostel-stamp-focus-change)
+  (add-hook 'pre-command-hook #'my/ghostel-drop-focus-flag)
   (advice-add 'ghostel-mouse-press-or-copy-mode
-              :before #'ml/ghostel-expire-focus-flag))
+              :before #'my/ghostel-expire-focus-flag))
 
 ;; MELPA ghostel (dakra) on all systems.  Since v0.60.0 dakra ships the Windows
 ;; module and ConPTY assets, and `ghostel-exec' uses the native PTY, so Windows
@@ -232,25 +232,25 @@ A rebuild makes `ghostel-semi-char-mode-map' again from
     ;; Resolves bash.exe from $PATH -- make sure Git Bash's usr/bin (the real
     ;; bash.exe, NOT git-bash.exe, a mintty GUI launcher) is on $PATH.
     ;; -l login, -i interactive.
-    (defun ml/ghostel-bash ()
+    (defun my/ghostel-bash ()
       "Open a Ghostel terminal running Git Bash (bash.exe from `$PATH')."
       (interactive)
       (if-let* ((bash (executable-find "bash")))
           (let ((ghostel-shell (list bash "-l" "-i")))
             (ghostel))
         (user-error "bash not found on $PATH -- add Git Bash's usr/bin to $PATH"))))
-  :hook (ghostel-mode . ml/ghostel-sync-hel)
+  :hook (ghostel-mode . my/ghostel-sync-hel)
   :bind (:map ghostel-mode-map
               ("M-c" . ghostel-copy-mode)
               ("M-e" . ghostel-emacs-mode)
-              ("M-t" . ml/ghostel-split-new))
+              ("M-t" . my/ghostel-split-new))
   :config
   (dolist (fn '(ghostel-semi-char-mode
                 ghostel-char-mode
                 ghostel-emacs-mode
                 ghostel-copy-mode
                 ghostel-readonly-exit))
-    (advice-add fn :after #'ml/ghostel-sync-hel))
+    (advice-add fn :after #'my/ghostel-sync-hel))
   (when-let* (((not IS-WINDOWS))
               (lib (locate-library "ghostel"))
               (script (expand-file-name "etc/shell/ghostel.zsh"
@@ -271,13 +271,13 @@ A rebuild makes `ghostel-semi-char-mode-map' again from
 ;; `fboundp': the module is downloaded on demand, so a fresh elpa dir has the
 ;; Lisp and no module.  `ghostel-comint-filter' calls the native entry point
 ;; anyway (void-function) on first output, in a preoutput filter.
-(defun ml/shell-enable-ghostel-comint ()
+(defun my/shell-enable-ghostel-comint ()
   "Enable `ghostel-comint-mode' when ghostel-comint and its native module load."
   (when (and (require 'ghostel-comint nil t)
              (fboundp 'ghostel--comint-make-state))
     (ghostel-comint-mode 1)))
 
-(add-hook 'shell-mode-hook #'ml/shell-enable-ghostel-comint)
+(add-hook 'shell-mode-hook #'my/shell-enable-ghostel-comint)
 
 ;; `claude' started from an Emacs terminal inherits Emacs's env, which never ran scm_breeze.
 ;; Claude Code's Bash tool then sources a shell snapshot that replays
@@ -471,7 +471,7 @@ Stolen from aweshell."
   :ensure t)
 
 (add-hook 'eshell-mode-hook
-          (defun my-eshell-mode-hook ()
+          (defun my/eshell-mode-hook ()
             (require 'eshell-z)))
 
 (defun eshell-current-directory (&optional directory)

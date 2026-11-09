@@ -344,7 +344,7 @@ If OTHER-WINDOW is non-nil, open the directory in another window."
 ;; Initialize the default translator, let it translate between en and zh via Google Translate,
 ;; and the result will be displayed in the Echo Area.
 
-;; Polishing lives in `ml-llm-proof' (lisp/init-local-llm-proof.el), which
+;; Polishing lives in `my/llm-proof' (lisp/init-local-llm-proof.el), which
 ;; reaches its endpoint through the gitignored proofread config.  `gt' keeps
 ;; translation only.
 
@@ -432,7 +432,7 @@ This moves its load time out of startup.  A batch run, such as
 (require 'init-local-etaf)
 
 
-(defun ml-update-all-packages ()
+(defun my/update-all-packages ()
   "Update all installed packages, including async-installer Git packages.
 Clone the Git packages before updating them.  The update pass skips a
 package whose `external-packages/' directory is absent and counts it as a
@@ -459,9 +459,9 @@ without `.git' fails in the update pass; see
         (when (fboundp 'anvil-server-install)
           (cl-letf (((symbol-function 'yes-or-no-p) #'always))
             (anvil-server-install)))
-        (ml-compile-local-lisp))))))
+        (my/compile-local-lisp))))))
 
-(defun ml-compile-local-lisp ()
+(defun my/compile-local-lisp ()
   "Byte-compile again each out-of-date `.elc' in `lib/', `site-lisp/' and
 `external-packages/'.  Files that have no `.elc' (tests, scripts, `lisp/')
 stay as source.  Emacs then native-compiles the new `.elc' files when they
@@ -472,7 +472,7 @@ load."
       (when (file-directory-p path)
         (byte-recompile-directory path)))))
 
-(defun ml-init-ediff-current-with-other-window ()
+(defun my/init-ediff-current-with-other-window ()
   "Ediff current window buffer with the next window buffer."
   (interactive)
   (if (< (count-windows) 2)

@@ -105,7 +105,7 @@
     "C-c e c" #'eshell-current-directory
     "C-c e d" #'ediff
     "C-c e b" #'ediff-buffers
-    "C-c e w" #'ml-init-ediff-current-with-other-window
+    "C-c e w" #'my/init-ediff-current-with-other-window
 
     ;; Edit / Denote / Dired.
     "C-c d d" #'kill-whole-line
@@ -127,7 +127,7 @@
     "C-c g u" #'vc-push
     "C-c g l" #'vc-print-root-log
     "C-c g f" #'vc-pull
-    "C-c g p" #'ml-llm-proof
+    "C-c g p" #'my/llm-proof
     "C-c g h" #'ghostel
     "C-c g n" #'my/hel-new-ghostel-buffer
     "C-c g o" #'ghostel-project

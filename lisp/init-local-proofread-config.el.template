@@ -13,33 +13,33 @@
 
 ;;; Code:
 
-(setq ml-proofread-endpoint-url "https://ENDPOINT-HOST/v1/")
-(setq ml-proofread-auth-host "ENDPOINT-HOST")
-(setq ml-proofread-auth-user "apikey")
-(setq ml-proofread-chat-model "MODEL-NAME")
-(setq ml-proofread-provider-identity "PROVIDER:MODEL")
-(setq ml-proofread-source-label "MODEL")
+(setq my/proofread-endpoint-url "https://ENDPOINT-HOST/v1/")
+(setq my/proofread-auth-host "ENDPOINT-HOST")
+(setq my/proofread-auth-user "apikey")
+(setq my/proofread-chat-model "MODEL-NAME")
+(setq my/proofread-provider-identity "PROVIDER:MODEL")
+(setq my/proofread-source-label "MODEL")
 
 ;; Uncomment and fill in only when MODEL-NAME needs non-standard chat
 ;; parameters, such as a reasoning effort or a pinned OpenRouter route.
-;; (setq ml-proofread-chat-params
+;; (setq my/proofread-chat-params
 ;;       '((reasoning . ((effort . "low")))))
 
 ;; Uncomment and fill in only when `llm' does not already know MODEL-NAME.
 ;; See `llm-models-add' for the full argument list.  `llm-models-match'
 ;; downcases the requested model before testing :regex against it, so
 ;; write the regex against the lowercase form of MODEL-NAME.
-;; (setq ml-proofread-model-metadata
+;; (setq my/proofread-model-metadata
 ;;       (list :name "MODEL-NAME"
-;;             :symbol 'my-model
+;;             :symbol 'my/model
 ;;             :capabilities '(generation json-response)
 ;;             :context-length 128000
 ;;             :regex "model-name\\'"))
 
-;; `ml-llm-proof' follows the model above by default and still sends
-;; `ml-proofread-chat-params' with every request.  Uncomment this to
+;; `my/llm-proof' follows the model above by default and still sends
+;; `my/proofread-chat-params' with every request.  Uncomment this to
 ;; proofread selected text with a different model.
-;; (setq ml-llm-proof-model "OTHER-MODEL-NAME")
+;; (setq my/llm-proof-model "OTHER-MODEL-NAME")
 
 (provide 'init-local-proofread-config)
 ;;; init-local-proofread-config.el ends here

@@ -11,11 +11,11 @@
 ;; in normal mode and gc in visual mode
 ;; (thanks you to the Reddit user u/mistakenuser for this contribution, which replaces the evil-commentary package):
 (with-eval-after-load "evil"
-  (evil-define-operator my-evil-comment-or-uncomment (beg end)
+  (evil-define-operator my/evil-comment-or-uncomment (beg end)
     "Toggle comment for the region between BEG and END."
     (interactive "<r>")
     (comment-or-uncomment-region beg end))
-  (evil-define-key 'normal 'global (kbd "gc") 'my-evil-comment-or-uncomment))
+  (evil-define-key 'normal 'global (kbd "gc") 'my/evil-comment-or-uncomment))
 
 ;; (defun my/evil-delete (orig-fn beg end &optional type _ &rest args)
 ;;   "Make evil-delete use the black hole register (_) instead of default register."
@@ -66,7 +66,7 @@ ARGS are additional arguments."
   (kbd "<leader> qr")  '("Restart Emacs" . restart-emacs)
 
   ;; comment
-  (kbd "<leader> /")  '("Commentary" . my-evil-comment-or-uncomment)
+  (kbd "<leader> /")  '("Commentary" . my/evil-comment-or-uncomment)
 
   ;; buffer
   (kbd "<leader> bn") '("Next buffer" . evil-next-buffer)
@@ -175,7 +175,7 @@ ARGS are additional arguments."
 
   ;; gt
   (kbd "<leader> gt") '("translate" . gt-translate)
-  (kbd "<leader> gp") '("polish region" . ml-llm-proof)
+  (kbd "<leader> gp") '("polish region" . my/llm-proof)
   ;; NOTE: this whole `<leader>' block is inert.  It binds through
   ;; `evil-define-key', and evil is commented out above — Hel owns the leader
   ;; now, and its bindings live in `my/hel-setup-leader'.
@@ -191,7 +191,7 @@ ARGS are additional arguments."
   ;; diff
   (kbd "<leader> ed") '("ediff" . ediff)
   (kbd "<leader> eb") '("ediff buffer" . ediff-buffers)
-  (kbd "<leader> ew") '("ediff windows" . ml-init-ediff-current-with-other-window)
+  (kbd "<leader> ew") '("ediff windows" . my/init-ediff-current-with-other-window)
 
   ;; pulsar
   (kbd "<leader> ph") '("permanently highlight curren line" . pulsar-highlight-permanently-dwim)

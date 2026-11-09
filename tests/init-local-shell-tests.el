@@ -9,8 +9,8 @@
    (expand-file-name "../lisp/init-local-shell.el"
                      (file-name-directory load-file-name)))
   (dolist (name '(init-ghostel-cursor-sync init-ghostel-speed-up
-                  ml/ghostel-sync-hel ml/shell-enable-ghostel-comint
-                  ml/ghostel-smart-paste ml/ghostel-bind-terminal-keys))
+                  my/ghostel-sync-hel my/shell-enable-ghostel-comint
+                  my/ghostel-smart-paste my/ghostel-bind-terminal-keys))
     (goto-char (point-min))
     (search-forward (format "(defun %s " name))
     (beginning-of-line)
@@ -34,7 +34,7 @@
                 ((symbol-function 'ghostel-send-key)
                  (lambda (&rest args) (setq sent args)))
                 ((symbol-function 'ghostel-yank) (lambda () (setq yanked t))))
-        (ml/ghostel-smart-paste)
+        (my/ghostel-smart-paste)
         (should (equal sent (and image '("v" "ctrl"))))
         (should (eq yanked (not image)))))))
 
@@ -45,7 +45,7 @@
               ((symbol-function 'gui-get-selection)
                (lambda (&rest _) (ert-fail "Unexpected GUI clipboard query")))
               ((symbol-function 'ghostel-yank) (lambda () (setq yanked t))))
-      (ml/ghostel-smart-paste)
+      (my/ghostel-smart-paste)
       (should yanked))))
 
 (defvar ghostel-semi-char-mode-map)
@@ -57,10 +57,10 @@
         (ghostel-char-mode-map (make-sparse-keymap))
         (global-paste (lookup-key (current-global-map) (kbd "s-v"))))
     (dotimes (_ 2)
-      (ml/ghostel-bind-terminal-keys)
+      (my/ghostel-bind-terminal-keys)
       (dolist (map (list ghostel-semi-char-mode-map ghostel-char-mode-map))
         (dolist (key '("C-v" "s-v"))
-          (should (eq (lookup-key map (kbd key)) #'ml/ghostel-smart-paste))))
+          (should (eq (lookup-key map (kbd key)) #'my/ghostel-smart-paste))))
       (should (eq (lookup-key ghostel-semi-char-mode-map (kbd "M-c"))
                   #'ghostel-copy-mode)))
     (should (eq (lookup-key (current-global-map) (kbd "s-v")) global-paste))))
@@ -97,7 +97,7 @@
   (let ((blink-cursor-mode nil)
         (default-display (default-value 'nobreak-char-display)))
     (cl-letf (((symbol-function 'hel-local-mode) #'ignore)
-              ((symbol-function 'ml/ghostel-copy-vi-mode) #'ignore)
+              ((symbol-function 'my/ghostel-copy-vi-mode) #'ignore)
               ((symbol-function 'ghostel--cursor-blink-stop) #'ignore))
       (save-window-excursion
         (with-temp-buffer
@@ -108,7 +108,7 @@
             (setq-local nobreak-char-display t)
             (insert ">\u00a0 ")
             (set-window-buffer (selected-window) (current-buffer))
-            (ml/ghostel-sync-hel)
+            (my/ghostel-sync-hel)
             (should-not nobreak-char-display)
             (should (eq cursor-type 'box))
             (should-not blink-cursor-mode))
@@ -120,7 +120,7 @@
   (let ((blink-cursor-mode nil))
     (cl-letf (((symbol-function 'hel-local-mode)
                (lambda (_) (setq-local cursor-type '(hbar . 4))))
-              ((symbol-function 'ml/ghostel-copy-vi-mode) #'ignore)
+              ((symbol-function 'my/ghostel-copy-vi-mode) #'ignore)
               ((symbol-function 'ghostel--cursor-blink-stop) #'ignore))
       (save-window-excursion
         (with-temp-buffer
@@ -128,7 +128,7 @@
           (set-window-buffer (selected-window) (current-buffer))
           (dolist (mode '(emacs copy semi-char char))
             (setq-local ghostel--input-mode mode)
-            (ml/ghostel-sync-hel)
+            (my/ghostel-sync-hel)
             (should (eq cursor-type 'box))
             (should-not blink-cursor-mode)))))))
 
@@ -153,5 +153,5 @@ Lisp present with no module is the regression: it breaks shell output."
                  (and module #'ignore))
                 ((symbol-function 'ghostel-comint-mode)
                  (lambda (arg) (setq enabled (> arg 0)))))
-        (ml/shell-enable-ghostel-comint))
+        (my/shell-enable-ghostel-comint))
       (should (eq enabled expected)))))

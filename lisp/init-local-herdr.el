@@ -4,7 +4,7 @@
 ;; `herdr-mode' stays off: it polls `herdr api snapshot' every 2 seconds.
 ;;; Code:
 
-(defun ml/herdr--column-pos (col)
+(defun my/herdr--column-pos (col)
   "Return the position of a │ within 2 columns of COL on this line, else nil.
 Emacs and the terminal can disagree by a column on wide characters."
   (save-excursion
@@ -15,12 +15,12 @@ Emacs and the terminal can disagree by a column on wide characters."
                      (point)))
               (mapcar (lambda (d) (+ col d)) '(0 -1 1 -2 2)))))
 
-(defun ml/herdr--tui-buffer-p ()
+(defun my/herdr--tui-buffer-p ()
   "Non-nil in the *herdr* Ghostel buffer, which draws the sidebar and borders."
   (and (derived-mode-p 'ghostel-mode)
        (string-match-p "\\`\\*herdr\\*" (buffer-name))))
 
-(defun ml/herdr--pane-segments (beg end anchor)
+(defun my/herdr--pane-segments (beg end anchor)
   "Return (FROM . TO) for each line of BEG..END, cut to the pane at ANCHOR.
 Herdr draws its sidebar and pane splits with │.  Copy and the region
 highlight both use these segments, so what is shown is what is copied."
@@ -37,8 +37,8 @@ highlight both use these segments, so what is shown is what is copied."
         segs)
     (save-excursion
       (goto-char beg)
-      (while (let* ((l (and lcol (ml/herdr--column-pos lcol)))
-                    (r (and rcol (ml/herdr--column-pos rcol)))
+      (while (let* ((l (and lcol (my/herdr--column-pos lcol)))
+                    (r (and rcol (my/herdr--column-pos rcol)))
                     (from (max beg (cond (l (1+ l))
                                          (lcol (save-excursion
                                                  (move-to-column (1+ lcol))
@@ -53,31 +53,31 @@ highlight both use these segments, so what is shown is what is copied."
                (and (zerop (forward-line 1)) (< (point) end)))))
     (nreverse segs)))
 
-(defun ml/herdr--pane-text (beg end &optional anchor)
+(defun my/herdr--pane-text (beg end &optional anchor)
   "Return text BEG..END; in the *herdr* TUI, keep only the pane column.
 Each line also loses the scrollbar (▕ or ▐) and trailing blanks.  The pane
 is the one at ANCHOR, else at the region start, else at point."
-  (if (not (ml/herdr--tui-buffer-p))
+  (if (not (my/herdr--tui-buffer-p))
       (buffer-substring-no-properties beg end)
     (mapconcat
      (lambda (seg)
        (replace-regexp-in-string "\\`│\\|[ \t\u00a0]*[▕▐]?[ \t\u00a0│]*\\'" ""
                                  (buffer-substring-no-properties (car seg) (cdr seg))))
-     (ml/herdr--pane-segments beg end (or anchor (if (use-region-p) beg (point))))
+     (my/herdr--pane-segments beg end (or anchor (if (use-region-p) beg (point))))
      "\n")))
 
-(defun ml/herdr--text-at-point ()
+(defun my/herdr--text-at-point ()
   "Return the region's pane text, or the line's without a leading ❯ or ⏺.
 Claude Code marks prompts with ❯ and replies with ⏺; a whole-line send of
 \"❯ ! cmd\" must start with \"!\" to run as a bash command."
   (string-trim
    (if (use-region-p)
-       (ml/herdr--pane-text (region-beginning) (region-end))
+       (my/herdr--pane-text (region-beginning) (region-end))
      (replace-regexp-in-string
       "\\`[ \t\u00a0]*[❯⏺][ \t\u00a0]*" ""
-      (ml/herdr--pane-text (line-beginning-position) (line-end-position))))))
+      (my/herdr--pane-text (line-beginning-position) (line-end-position))))))
 
-(defun ml/herdr--target-pane (snap)
+(defun my/herdr--target-pane (snap)
   "Return the pane id to send to without asking, or nil to let the user pick.
 SNAP is the `snapshot' object of `herdr api snapshot'.  A focused agent pane
 is its own target.  From a focused terminal pane, the target is the only
@@ -91,72 +91,72 @@ agent in its tab; with none or several, return nil."
                            (alist-get 'agents snap))))
                (and (= (length mates) 1) (alist-get 'pane_id (car mates))))))))
 
-(defun ml/herdr-copy-pane-text ()
+(defun my/herdr-copy-pane-text ()
   "Copy the region, or the line at point, without the herdr sidebar."
   (interactive)
-  (let ((text (ml/herdr--text-at-point)))
+  (let ((text (my/herdr--text-at-point)))
     (kill-new text)
     (deactivate-mark)
     (message "Copied: %s" (truncate-string-to-width text 60 nil nil "…"))))
-(global-set-key (kbd "C-c W") #'ml/herdr-copy-pane-text)
+(global-set-key (kbd "C-c W") #'my/herdr-copy-pane-text)
 
-(defun ml/herdr--copy-line-without-region (&rest _)
+(defun my/herdr--copy-line-without-region (&rest _)
   "In *herdr* copy mode, copy the line when no region is active.
 Ghostel's copy (M-w, RET) copies only a region, so M-c M-w did nothing."
-  (when (and (ml/herdr--tui-buffer-p) (not (use-region-p)))
-    (ml/herdr-copy-pane-text)))
-(advice-add 'ghostel-readonly-copy :before #'ml/herdr--copy-line-without-region)
+  (when (and (my/herdr--tui-buffer-p) (not (use-region-p)))
+    (my/herdr-copy-pane-text)))
+(advice-add 'ghostel-readonly-copy :before #'my/herdr--copy-line-without-region)
 
-(defun ml/herdr--filter-buffer-substring (orig beg end delete)
+(defun my/herdr--filter-buffer-substring (orig beg end delete)
   "Return BEG..END as pane text; call ORIG with the same args to delete.
 Every copy path (`kill-ring-save', copy mode RET and M-w, a mouse drag
 with `mouse-drag-copy-region') reads text through this filter."
   (if delete
       (funcall orig beg end delete)
-    (ml/herdr--pane-text beg end beg)))
+    (my/herdr--pane-text beg end beg)))
 
-(defun ml/herdr--highlight-region (start end window rol)
+(defun my/herdr--highlight-region (start end window rol)
   "Highlight START..END in WINDOW line by line, cut to the pane at START.
-Delete the old highlight ROL first.  Return (ml/herdr . OVERLAYS), tagged
+Delete the old highlight ROL first.  Return (my/herdr . OVERLAYS), tagged
 like `rectangle-mark-mode' does, for `redisplay-highlight-region-function'."
   (funcall redisplay-unhighlight-region-function rol)
-  (cons 'ml/herdr
+  (cons 'my/herdr
         (mapcar (lambda (seg)
                   (let ((ov (make-overlay (car seg) (cdr seg))))
                     (overlay-put ov 'window window)
                     (overlay-put ov 'face 'region)
                     (overlay-put ov 'priority '(nil . 100))
                     ov))
-                (ml/herdr--pane-segments start end start))))
+                (my/herdr--pane-segments start end start))))
 
-(defun ml/herdr--unhighlight-region (orig rol)
-  "Delete a tagged ROL from `ml/herdr--highlight-region', else call ORIG.
+(defun my/herdr--unhighlight-region (orig rol)
+  "Delete a tagged ROL from `my/herdr--highlight-region', else call ORIG.
 Global, because redisplay may drop the highlight from another buffer."
-  (if (eq (car-safe rol) 'ml/herdr)
+  (if (eq (car-safe rol) 'my/herdr)
       (mapc #'delete-overlay (cdr rol))
     (funcall orig rol)))
 (add-function :around (default-value 'redisplay-unhighlight-region-function)
-              #'ml/herdr--unhighlight-region)
+              #'my/herdr--unhighlight-region)
 
-(defun ml/herdr--setup-tui-buffer ()
+(defun my/herdr--setup-tui-buffer ()
   "In *herdr*, cut copies and the region highlight to the pane.
 Other Ghostel buffers keep Ghostel's own copy, which joins soft-wrapped lines."
-  (when (ml/herdr--tui-buffer-p)
+  (when (my/herdr--tui-buffer-p)
     (add-function :around (local 'filter-buffer-substring-function)
-                  #'ml/herdr--filter-buffer-substring)
-    (setq-local redisplay-highlight-region-function #'ml/herdr--highlight-region)))
+                  #'my/herdr--filter-buffer-substring)
+    (setq-local redisplay-highlight-region-function #'my/herdr--highlight-region)))
 ;; `herdr--create-buffer' names the buffer before it calls `ghostel-mode'.
-(add-hook 'ghostel-mode-hook #'ml/herdr--setup-tui-buffer)
+(add-hook 'ghostel-mode-hook #'my/herdr--setup-tui-buffer)
 
 (when (executable-find "herdr")
   (use-package herdr
     :ensure t
     :vc (:url "https://github.com/baongoc124/emacs-herdr" :rev :newest)
     ;; :bind, not `herdr-menu-key': that option binds only after herdr.el loads.
-    :bind (("C-c m" . ml/herdr-send-raw)
+    :bind (("C-c m" . my/herdr-send-raw)
            ("C-c M" . herdr-menu))
     :config
-    (defun ml/herdr-send-raw (&optional submit)
+    (defun my/herdr-send-raw (&optional submit)
       "Send the region, or the line at point, to an agent as typed text.
 Unlike `herdr-send-region', add no code fence, so \"! cmd\" stays a Claude
 Code bash command.  With prefix arg SUBMIT, also press Enter.
@@ -164,11 +164,11 @@ The agent is the focused pane when it is an agent, else the only agent in
 the focused pane's tab; otherwise pick it.  Then focus that agent."
       (interactive "P")
       ;; shortcut: uses herdr.el private helpers; re-check after package upgrades.
-      (let ((text (ml/herdr--text-at-point)))
+      (let ((text (my/herdr--text-at-point)))
         (when (string-empty-p text)
           (user-error "Nothing to send"))
         (let* ((json (herdr--snapshot-sync))
-               (target (ml/herdr--target-pane
+               (target (my/herdr--target-pane
                         (alist-get 'snapshot (alist-get 'result json))))
                (agent (or (and target
                                (seq-find (lambda (a) (equal (alist-get 'pane-id a) target))

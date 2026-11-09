@@ -17,7 +17,7 @@
   (interactive)
   (insert (format-time-string "%Y%m%dT%H%M")))
 
-(defun ml-init-ediff-current-with-other-window ()
+(defun my/init-ediff-current-with-other-window ()
   "Ediff current window buffer with the next window buffer."
   (interactive)
   (if (< (count-windows) 2)

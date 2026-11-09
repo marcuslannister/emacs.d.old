@@ -5,7 +5,7 @@
 ;; OpenAI-compatible endpoint as `init-local-proofread'.
 ;;
 ;; The model comes from the gitignored `init-local-proofread-config.el': it
-;; follows `ml-proofread-chat-model' unless that file sets `ml-llm-proof-model'
+;; follows `my/proofread-chat-model' unless that file sets `my/llm-proof-model'
 ;; to a different one.
 ;;
 ;; Adapted from Ben Simon's gptel-proof.el:
@@ -20,20 +20,20 @@
 
 ;; A `defvar' keeps the value the private config already gave this variable, so
 ;; the fallback below runs only when that config stays quiet.
-(defvar ml-llm-proof-model ml-proofread-chat-model
-  "Name of the model used by `ml-llm-proof'.
+(defvar my/llm-proof-model my/proofread-chat-model
+  "Name of the model used by `my/llm-proof'.
 Set in `init-local-proofread-config.el' to proofread selected text
-with a model other than `ml-proofread-chat-model'.  It still sends
-`ml-proofread-chat-params' with every request.")
+with a model other than `my/proofread-chat-model'.  It still sends
+`my/proofread-chat-params' with every request.")
 
-(defvar ml-llm-proof-gentle-prompt
+(defvar my/llm-proof-gentle-prompt
   (concat "Proofread the following text for spelling, punctuation, grammar, "
           "and natural international workplace English. Preserve its meaning, "
           "word choice, tone, line breaks, and formatting. Make only necessary "
           "changes. Output only the corrected text.")
   "System prompt that asks for corrections only.")
 
-(defvar ml-llm-proof-aggressive-prompt
+(defvar my/llm-proof-aggressive-prompt
   (concat "Polish the following text as natural, clear, concise international "
           "workplace English. Preserve its meaning and factual claims. Prefer "
           "active voice only when it is clearer, and avoid unnecessary rewriting. "
@@ -41,10 +41,10 @@ with a model other than `ml-proofread-chat-model'.  It still sends
           "corrected text.")
   "System prompt that asks for a freer rewrite.")
 
-(defconst ml-llm-proof-placeholder "…"
+(defconst my/llm-proof-placeholder "…"
   "Text that holds the place of a reply that has not arrived.")
 
-(defun ml-llm-proof-apply-fix (buffer beg end correction)
+(defun my/llm-proof-apply-fix (buffer beg end correction)
   "Replace the text between BEG and END in BUFFER with CORRECTION.
 BEG and END are markers, so they follow their text through any edit
 that lands while the reply is in flight, and no two requests can name
@@ -59,11 +59,11 @@ so you read the change instead of both texts."
         ;; Point sits in the lower half, so the conflict is the one at point.
         ;; Refinement needs the `diff' program and well-formed markers, and
         ;; neither failure may cost the correction itself.
-        (ignore-errors (ml-llm-proof--refine)))))
+        (ignore-errors (my/llm-proof--refine)))))
   (set-marker beg nil)
   (set-marker end nil))
 
-(defun ml-llm-proof--refine ()
+(defun my/llm-proof--refine ()
   "Colour the words that differ between the halves of the conflict at point.
 `smerge-refine' paints both halves with `smerge-refined-change' as soon
 as a theme defines that face, which loses the direction of the change,
@@ -78,14 +78,14 @@ so drive the same refinement with the added and removed faces instead."
                          '((smerge . refine)
                            (font-lock-face . smerge-refined-added))))
 
-(defun ml-llm-proof (start end &optional aggressive)
+(defun my/llm-proof (start end &optional aggressive)
   "Proofread the region between START and END.
 With prefix argument AGGRESSIVE, polish more freely."
   (interactive "r\nP")
   (unless (use-region-p)
     (user-error "No region selected"))
-  (unless ml-llm-proof-model
-    (user-error "No model: set `ml-llm-proof-model' in the private proofread config"))
+  (unless my/llm-proof-model
+    (user-error "No model: set `my/llm-proof-model' in the private proofread config"))
   (let* ((buffer (current-buffer))
          (input (buffer-substring-no-properties start end))
          (start-conflict "<<<<<<< Original\n")
@@ -104,20 +104,20 @@ With prefix argument AGGRESSIVE, polish more freely."
       ;; Markers, not a search string: they hold this one place through any
       ;; edit that lands first, and they cannot name another request's place.
       (setq reply-beg (point-marker))
-      (insert ml-llm-proof-placeholder)
+      (insert my/llm-proof-placeholder)
       ;; Both markers keep the default insertion type, so the closing marker
       ;; stays put when the rest of the block goes in after it.
       (setq reply-end (point-marker))
       (insert (format "\n>>>>>>> Proofread (%s)\n"
                       (if aggressive "aggressive" "gentle"))))
     (llm-chat-async
-     (ml-proofread--provider ml-llm-proof-model ml-proofread-chat-params)
+     (my/proofread--provider my/llm-proof-model my/proofread-chat-params)
      (llm-make-chat-prompt input
                            :context (if aggressive
-                                        ml-llm-proof-aggressive-prompt
-                                      ml-llm-proof-gentle-prompt))
+                                        my/llm-proof-aggressive-prompt
+                                      my/llm-proof-gentle-prompt))
      (lambda (response)
-       (ml-llm-proof-apply-fix buffer reply-beg reply-end response))
+       (my/llm-proof-apply-fix buffer reply-beg reply-end response))
      (lambda (err msg)
        (set-marker reply-beg nil)
        (set-marker reply-end nil)

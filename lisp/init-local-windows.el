@@ -15,23 +15,23 @@
 (setq exec-suffixes '("" ".exe" ".cmd" ".bat" ".com")
       exec-path (delete-dups (mapcar #'directory-file-name exec-path)))
 
-(defvar my-executable-find-cache (make-hash-table :test 'equal :size 100))
+(defvar my/executable-find-cache (make-hash-table :test 'equal :size 100))
 
-(defun my-executable-find-clear-cache (&rest _)
-  (clrhash my-executable-find-cache))
+(defun my/executable-find-clear-cache (&rest _)
+  (clrhash my/executable-find-cache))
 
 ;; Clear when the global PATH changes.  Buffer-local changes (envrc)
 ;; skip the cache in the advice.
 (add-variable-watcher 'exec-path
                       (lambda (_sym _new _op where)
-                        (unless where (my-executable-find-clear-cache))))
+                        (unless where (my/executable-find-clear-cache))))
 
-(define-advice executable-find (:around (orig-fun command &optional remote) my-cache)
+(define-advice executable-find (:around (orig-fun command &optional remote) my/cache)
   (if (or remote (local-variable-p 'exec-path))
       (funcall orig-fun command remote)
-    (let ((hit (gethash command my-executable-find-cache 'miss)))
+    (let ((hit (gethash command my/executable-find-cache 'miss)))
       (if (eq hit 'miss)
-          (puthash command (funcall orig-fun command) my-executable-find-cache)
+          (puthash command (funcall orig-fun command) my/executable-find-cache)
         hit))))
 
 ;; These defaults call `executable-find' when their package loads.
@@ -42,7 +42,7 @@
 ;; mode line shows no Git branch; vc-dir, Magit and diff-hl still work.
 (remove-hook 'find-file-hook #'vc-refresh-state)
 
-(defun my-open-in-external-app ()
+(defun my/open-in-external-app ()
   "Open the current file in an external app."
   (interactive)
   (require 'dired-aux)
