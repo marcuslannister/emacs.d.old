@@ -13,13 +13,13 @@
 (defconst DEFAULT-FONT
   (format "%s %d"
           (if IS-WINDOWS
-              "Aporetic Sans M Nerd Font"
+              "Aporetic Sans Mono"
             "MonoLisa Nerd Font")
           FONT-SIZE))
 (defconst ORG-FONT
   (format "%s %d"
           (if IS-WINDOWS
-              "Aporetic Sans M Nerd Font"
+              "Aporetic Sans Mono"
             "MonoLisa Nerd Font")
           FONT-SIZE))
 (defconst ZH-DEFAULT-FONT "Maple Mono NF CN")
