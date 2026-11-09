@@ -74,7 +74,7 @@ reinstalling fresh tarball files.
 | `:ensure t` → `:ensure nil` + `:load-path "external-packages/ghostel/lisp"` | `lisp/init-local-shell.el:42` |
 | Removed dead `GHOSTEL_SH_INTEGRATION` block (fork has built-in `ghostel-shell-integration`, default `t`; old `etc/shell/ghostel.zsh` path doesn't exist in clone's lisp/ layout) | `lisp/init-local-shell.el` `:config` |
 | Kept: Windows `ghostel-module-directory` pin, Hel-sync hook, M-v binds | unchanged |
-| **Shell config (Windows): set `ghostel-shell` to PowerShell 7 + added `ml/ghostel-bash` escape hatch** | `lisp/init-local-shell.el` `:init` |
+| **Shell config (Windows): set `ghostel-shell` to PowerShell 7 + added `my/ghostel-bash` escape hatch** | `lisp/init-local-shell.el` `:init` |
 
 ## Shell Configuration (Windows) — added 2026-05-31, revised 2026-06-01
 `ghostel-shell` (string or list `(program args...)`) selects the spawned shell; it
@@ -85,7 +85,7 @@ defaulted to `$SHELL`/cmdproxy.exe (cmd.exe). Now configured on Windows:
   paths (no MSYS `/c/...` translation), which is what Claude Code and the native
   `git`/`rg` it spawns expect. Trade-off: **no OSC-133 shell integration** (pwsh
   is not bash/zsh/fish), so no prompt markers / directory tracking.
-- **`M-x ml/ghostel-bash` → Git Bash:** escape hatch for unix-y interactive work.
+- **`M-x my/ghostel-bash` → Git Bash:** escape hatch for unix-y interactive work.
   Resolves `bash.exe` via `executable-find` (i.e. from `$PATH`) and `let`-binds
   `ghostel-shell` to `(list <resolved-bash> "-l" "-i")`, then calls `ghostel`.
   Detected as `bash` by `ghostel--detect-shell`, so **shell integration applies**.
@@ -105,7 +105,7 @@ PowerShell 7 = `C:/Program Files/PowerShell/7/pwsh.exe`.
 ## Next Steps
 1. **Restart Emacs** (or re-eval `lisp/init-local-shell.el`) so the live daemon
    loads the kiennq Elisp. Then run `M-x ghostel` — should open with no modal,
-   landing at a **PowerShell 7** prompt. `M-x ml/ghostel-bash` → Git Bash.
+   landing at a **PowerShell 7** prompt. `M-x my/ghostel-bash` → Git Bash.
    NOTE: in the CURRENT live daemon the old dakra Elisp is still loaded, so the
    terminal may not render until restart — that's the module-load issue, NOT the
    shell config (shell config is verified correct by the resolver regardless).

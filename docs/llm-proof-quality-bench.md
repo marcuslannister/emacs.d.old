@@ -1,4 +1,4 @@
-# ml-llm-proof quality bench
+# my/llm-proof quality bench
 
 A manual bench for the region proofreading command in
 `lisp/init-local-llm-proof.el`. Use it to judge a model before you set it in
@@ -16,7 +16,7 @@ Load first:
     M-x load-library RET init-local-proofread RET
     M-x load-library RET init-local-llm-proof RET
 
-`M-x ml-llm-proof` on the region, `C-u M-x ml-llm-proof` for the aggressive
+`M-x my/llm-proof` on the region, `C-u M-x my/llm-proof` for the aggressive
 pass.
 
 ---
@@ -68,7 +68,7 @@ The function below replaces the marker with the correction. Note it search from
 the beginning of buffer, so a duplicated marker would be wrong replaced.
 
 ```elisp
-(defun ml-llm-proof-apply-fix (buffer marker correction)
+(defun my/llm-proof-apply-fix (buffer marker correction)
   "Replace MARKER in BUFFER with CORRECTION."
   (with-current-buffer buffer
     (goto-char (point-min))
@@ -153,7 +153,7 @@ Set the model in the private config, restart or reload the module, and run the
 same six cases:
 
     ;; lisp/init-local-proofread-config.el
-    (setq ml-llm-proof-model "OTHER-MODEL-NAME")
+    (setq my/llm-proof-model "OTHER-MODEL-NAME")
 
 Score each case out of its listed mistakes, then subtract one point per
 unwanted change. Cases 5 and 6 separate the good models from the eager ones.

@@ -7,7 +7,7 @@ Verified: 2026-08-23 and 2026-08-24
 Selected on 2026-08-25 for the actual Emacs workflow:
 
 - Use `google/gemini-3.7-flash` through OpenRouter for the context-aware
-  Proofread checker and selected-text `ml-llm-proof` command.
+  Proofread checker and selected-text `my/llm-proof` command.
 - Do not add an automatic fallback before the main workflow needs one.
 - Keep `tencent/hy-mt2-30b-a3b` for occasional translation. Do not route normal
   proofreading through the translation model.
@@ -259,8 +259,8 @@ After the human reviewer selects the English-polishing winner:
 1. Update only the gitignored `lisp/init-local-proofread-config.el`: use
    `https://openrouter.ai/api/v1/` as the endpoint, `openrouter.ai` as the
    auth-source host, and the selected OpenRouter model ID as the chat model.
-   Set `ml-proofread-provider-identity` to a new non-secret value that includes
-   the selected model ID, and update `ml-proofread-source-label` to name that
+   Set `my/proofread-provider-identity` to a new non-secret value that includes
+   the selected model ID, and update `my/proofread-source-label` to name that
    model. Keep the API key in `auth-source`; never put it in the config file.
 2. Restart Emacs so the checker uses a new provider object and cache identity.
 3. Run the production Proofread checker on the five committed polishing cases.

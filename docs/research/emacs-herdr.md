@@ -56,7 +56,7 @@ Herdr's README does not state a minimum macOS version (unverified).
 
 | Option | Repo precedent | Notes |
 |--------|----------------|-------|
-| `use-package` `:vc` | `lisp/init-git.el:71-73` (magit-fast), `lisp/init-local-majutsu.el:97-99`, `lisp/init-local-macos.el:32-34` | **Recommended.** package.el installs `ghostel` from MELPA for the Package-Requires; `ml-update-all-packages` already runs `package-vc-upgrade-all` (`lisp/init-local.el:441`). |
+| `use-package` `:vc` | `lisp/init-git.el:71-73` (magit-fast), `lisp/init-local-majutsu.el:97-99`, `lisp/init-local-macos.el:32-34` | **Recommended.** package.el installs `ghostel` from MELPA for the Package-Requires; `my/update-all-packages` already runs `package-vc-upgrade-all` (`lisp/init-local.el:441`). |
 | async-installer `:tag` pin | `lisp/package-list.el:11-13` (anvil), Hel | Use only if you want a pinned commit. The repo has no tags, so you would pin `:commit`. |
 | Vendor into `site-lisp/` | `site-lisp/` | Not recommended: no update path, and the package changes often (3 commits on 2026-10-12). |
 | MELPA `maybe-require-package` | many | Not possible: emacs-herdr is not on MELPA (its README gives only `:vc` or a checkout, README.org:43-61). Unverified against the MELPA recipe list. |
@@ -97,9 +97,9 @@ only when the `herdr` binary exists, and it adds these keys:
 
 | Key | Command | Result |
 |-----|---------|--------|
-| `C-c m` | `ml/herdr-send-raw` | Type the region or line into an agent, with no code fence; `C-u` also presses Enter (`herdr pane run`). Sends without a prompt to the focused pane when it is an agent, or to the only agent in a focused terminal pane's tab; else asks. Then focuses the agent |
+| `C-c m` | `my/herdr-send-raw` | Type the region or line into an agent, with no code fence; `C-u` also presses Enter (`herdr pane run`). Sends without a prompt to the focused pane when it is an agent, or to the only agent in a focused terminal pane's tab; else asks. Then focuses the agent |
 | `C-c M` | `herdr-menu` | Herdr transient menu |
-| `C-c W` | `ml/herdr-copy-pane-text` | Copy the region or line without the sidebar, borders, or scrollbar |
+| `C-c W` | `my/herdr-copy-pane-text` | Copy the region or line without the sidebar, borders, or scrollbar |
 | `RET` in Ghostel copy mode | advice on `ghostel-readonly-copy` | In `*herdr*`, copy only the pane text |
 
 For a whole line (no region), `C-c m` and `C-c W` also remove a leading
@@ -135,7 +135,7 @@ personal overrides in `lisp/init-local.el`").
 
 `herdr pane read <PANE_ID> --source visible` returns a pane's screen rows
 without the sidebar, borders, or scrollbar. Use it as ground truth for any
-change to `ml/herdr--pane-text`: in the live `*herdr*` buffer, run the helper
+change to `my/herdr--pane-text`: in the live `*herdr*` buffer, run the helper
 over every row of each pane (`herdr pane layout` lists the pane ids) and
 compare row by row. One hand-picked line is not enough, because wide
 characters shift borders by a column on some rows only. Expected differences:
@@ -147,7 +147,7 @@ selection starts inside a line.
 - **You already run Herdr in Ghostel by hand.** `docs/ghostel-module.md:9`
   names a Herdr border bug as the reason for the patched Ghostel module. The
   `*herdr*` buffer uses `ghostel-mode` (herdr.el:410), so the same patched
-  module, `ml/ghostel-sync-hel`, and the `M-1`..`M-9` exceptions
+  module, `my/ghostel-sync-hel`, and the `M-1`..`M-9` exceptions
   (`lisp/init-local-shell.el:160-168`) apply to it.
 - **`ctrl+b` prefix.** `C-b` is not in `ghostel-keymap-exceptions`, so it
   goes to Herdr in semi-char mode. In char mode all keys go to the terminal;

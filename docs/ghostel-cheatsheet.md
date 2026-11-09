@@ -22,18 +22,18 @@ while `C-u` is unbound for scrolling).
 
 ## Input modes
 
-Ghostel has four input modes. Hel and `ml/ghostel-copy-vi-mode` are kept in
-sync with whichever mode is active (see `ml/ghostel-sync-hel`).
+Ghostel has four input modes. Hel and `my/ghostel-copy-vi-mode` are kept in
+sync with whichever mode is active (see `my/ghostel-sync-hel`).
 
 | Key | Switches to | Notes |
 | --- | --- | --- |
 | `M-e` | Emacs mode | Buffer is read-only; ordinary Emacs/Hel keys work |
-| `M-c` | Copy mode | Freezes the display; `ml/ghostel-copy-vi-mode` takes over |
+| `M-c` | Copy mode | Freezes the display; `my/ghostel-copy-vi-mode` takes over |
 | (default) | Semi-char mode | Most keys go straight to the shell |
 
 ## Copy mode (tmux-style vi selection)
 
-Active only while `ml/ghostel-copy-vi-mode` is on (i.e. in copy mode).
+Active only while `my/ghostel-copy-vi-mode` is on (i.e. in copy mode).
 
 | Key | Action |
 | --- | --- |
