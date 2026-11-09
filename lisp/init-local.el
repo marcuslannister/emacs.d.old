@@ -138,8 +138,6 @@ If OTHER-WINDOW is non-nil, open the directory in another window."
  (IS-LINUX
   (require 'init-local-linux nil t)))
 
-;; majutsu for jj
-;; (require 'init-local-majutsu nil t)
 ;; Load org config
 (require 'init-local-org)
 (require 'init-local-append-review)

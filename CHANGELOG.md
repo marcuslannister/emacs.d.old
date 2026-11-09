@@ -112,6 +112,7 @@ continuously, so changes land under "Unreleased".
 
 ### Removed
 - Remove the `j` and `k` scroll bindings and their helpers (`init-local-etaf-scroll-down`, `init-local-etaf-scroll-up`) from `lisp/init-local-etaf.el`. `etaf-md-preview` 0.1.9 removed `etaf-md-preview-mode-map`, so `define-key` signalled `void-variable` and made `my/update-all-packages` fail to compile `etaf-md-preview-live.el`. The preview now accepts typing as soon as it opens, so a bare `j` or `k` view key would block typing. Its view keys are under `C-c C-m`.
+- Remove `lisp/init-local-majutsu.el` (Majutsu, a jj porcelain). Nothing loaded it and the package was not installed, so it was dead code. The commented-out Majutsu stubs in `lisp/init-local.el` and `lisp/init-local-keybinding.el` are gone too.
 
 ### Added
 - Install `material-icons` (Material Icon Theme SVG icons) from MELPA in `lisp/init-local-themes.el`, hooked to `dired-mode` and `ibuffer-mode` and enabled in Speedbar, sized at 22px. Drops the `nerd-icons-dired-mode` hook so the two icon sets don't both run in the same Dired buffer; `nerd-icons-dired` stays installed for its other commands.
