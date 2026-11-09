@@ -134,6 +134,7 @@
 
     ;; Highlight.
     "C-c h l" #'pulsar-highlight-permanently-dwim
+    "C-c h e" #'herdr
 
     ;; Project.
     "C-c p p" #'project-find-file
@@ -401,8 +402,9 @@ manual selection is searched as-is instead of being replaced."
     "C-c g h" "Ghostel terminal"
     "C-c g n" "New Ghostel buffer"
     "C-c g o" "Ghostel project terminal"
-    "C-c h"   "highlight"
+    "C-c h"   "highlight / herdr"
     "C-c h l" "Permanently highlight line"
+    "C-c h e" "Start Herdr"
     "C-c p"   "project"
     "C-c p p" "Project find file"
     "C-c j"   "denote journal"

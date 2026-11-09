@@ -7,6 +7,7 @@ continuously, so changes land under "Unreleased".
 ## Unreleased
 
 ### Added
+- Hel `SPC h e` (`C-c h e`) starts Herdr: it runs `herdr`, which pops to the `*herdr*` Ghostel buffer and launches Herdr if needed. The key needs the `herdr` binary, as the package loads only then. The `h` group is now named "highlight / herdr".
 - Hel `SPC n r t` and `SPC n r i` refile the note at point to the top of `Today` or `Inbox` in `~/org/notes.org` (`init-local-append-review-to-today`, `init-local-append-review-to-inbox`), and `SPC n d` (`init-local-append-review-to-bottom`) asks for a top-level section and moves the note to the bottom of it. Tests are in `tests/init-local-append-review-tests.el`.
 - Hel `SPC n t` adds tags to the note at point (`org-set-tags-command`), and `SPC n s` (`init-local-append-review-show-tag`) opens `~/org/notes.org` and shows only the notes with a tag.
 - Add Karpathy's append-and-review note in the new `lisp/init-local-append-review.el`. Capture template `a` (Hel `C-c n n`) puts a new heading at the top of the `Inbox` section of `~/org/notes.org`. `C-c n u` (`init-local-append-review-to-top`) asks for a top-level section and moves the heading at point, with its subtree, to the top of that section. Hel `C-c n o` opens the file. The Hel `C-c n` prefix is now named "notes" and also holds the Blinko keys. Cheatsheet: `docs/append-and-review-cheatsheet.md`. Research notes are in `docs/research/append-and-review-note-org.md`; tests are in `tests/init-local-append-review-tests.el`.
