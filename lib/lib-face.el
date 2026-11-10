@@ -2,6 +2,8 @@
 ;;; Commentary: reference from https://github.com/LuciusChen/.emacs.d.git
 ;;; Code:
 
+(require 'cl-lib)
+
 (defun set-face-like-default (face)
   "Set FACE attributes to match the default face."
   (set-face-attribute face nil
