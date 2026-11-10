@@ -461,14 +461,37 @@ without `.git' fails in the update pass; see
 
 (defun my/compile-local-lisp ()
   "Byte-compile again each out-of-date `.elc' in `lib/', `site-lisp/' and
-`external-packages/'.  Files that have no `.elc' (tests, scripts, `lisp/')
-stay as source.  Emacs then native-compiles the new `.elc' files when they
-load."
+`external-packages/' in a clean batch Emacs process.  Compiling in a
+fresh process with `load-prefer-newer' prevents already-loaded features
+in the running session from hiding updated macros.  Files that have no
+`.elc' (tests, scripts, `lisp/') stay as source.  The compiler output
+goes to the `*compile-local-lisp*' buffer, which is shown when a file
+fails to compile."
   (interactive)
-  (dolist (dir '("lib" "site-lisp" "external-packages"))
-    (let ((path (expand-file-name dir user-emacs-directory)))
-      (when (file-directory-p path)
-        (byte-recompile-directory path)))))
+  (let ((dirs (seq-filter #'file-directory-p
+                          (mapcar (lambda (dir) (expand-file-name dir user-emacs-directory))
+                                  '("lib" "site-lisp" "external-packages")))))
+    (when dirs
+      (let ((emacs (expand-file-name invocation-name invocation-directory))
+            (child-form (prin1-to-string
+                         `(let ((load-prefer-newer t)
+                                (load-path ',load-path))
+                            (dolist (dir ',dirs)
+                              (byte-recompile-directory dir)))))
+            (log-buf (get-buffer-create "*compile-local-lisp*")))
+        (with-current-buffer log-buf (erase-buffer))
+        (unless (eql 0 (call-process emacs nil log-buf nil
+                                     "-Q" "--batch" "--eval" child-form))
+          (pop-to-buffer log-buf)
+          (error "Batch byte-recompile failed; see %s" (buffer-name log-buf)))
+        ;; Batch `byte-recompile-directory' exits 0 even when a file fails;
+        ;; its summary line then says ", N failed".
+        (when (with-current-buffer log-buf
+                (save-excursion
+                  (goto-char (point-min))
+                  (re-search-forward "^Done (.*, [0-9]+ failed" nil t)))
+          (display-buffer log-buf)
+          (message "Some files failed to compile; see %s" (buffer-name log-buf)))))))
 
 (defun my/init-ediff-current-with-other-window ()
   "Ediff current window buffer with the next window buffer."
