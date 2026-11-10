@@ -136,7 +136,7 @@ Effect: a trial with `--init-directory` keeps B's packages, state, and native co
 - Steps: make a fork or clone of B outside `~/Projects`, then `cd ~ && ln -sfn <B-dir> .emacs.d`, then restart Emacs.
 - Lost at once: everything in section 2. The MCP clients fail because `~/.emacs.d/anvil-stdio.sh` is gone.
 - Must edit first: B's identity and mail settings (`early-init.el:71-72`, `user-lisp/init-www.el:118-121`).
-- State: B writes `elpa/`, `var/`, `eln-cache/` into its own dir (B `.gitignore` ignores them). `user-lisp/custom.el` is not ignored.
+- State: B writes `elpa/`, `var/`, `eln-cache/` into its own dir (B `.gitignore` ignores them). `user-lisp/custom.el` is also ignored: the `custom.el` pattern at `.gitignore:6` matches at any depth.
 - Rollback: `cd ~ && ln -sfn Projects/emacs.d .emacs.d`, then restart Emacs. A's untracked state (`elpa-31.1/`, `external-packages/`, `anvil-stdio.sh`, `custom.el`) stays in place, so the rollback is complete.
 
 ### (b) Fork B, port A's local layer into `user-lisp/`
