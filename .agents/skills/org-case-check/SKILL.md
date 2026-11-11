@@ -39,4 +39,4 @@ tell the user that the buffers are not checked.
 ### 3. Report
 
 Give each damaged file and buffer with its lines. A count at or above the threshold blocks
-the save. Show the last entries of the file in `ml-case-guard-log-file`, if it exists.
+the save. Show the last entries of the file in `my/case-guard-log-file`, if it exists.

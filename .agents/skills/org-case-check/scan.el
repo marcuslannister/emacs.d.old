@@ -9,14 +9,14 @@
 
 (defun org-case-check--report (name)
   "Return the damage report for the current buffer under NAME, or nil if clean."
-  (let ((count (ml-case-guard-canary-count)))
+  (let ((count (my/case-guard-canary-count)))
     (when (> count 0)
       (save-excursion
         (save-restriction
           (widen)
           (let ((case-fold-search nil)
                 lines)
-            (dolist (pattern ml-case-guard-canary-patterns)
+            (dolist (pattern my/case-guard-canary-patterns)
               (goto-char (point-min))
               (while (re-search-forward pattern nil t)
                 (push (cons (line-number-at-pos)
@@ -24,14 +24,14 @@
                                               (line-end-position)))
                       lines)))
             (format "%s: %d matches, threshold %d\n%s\n"
-                    name count ml-case-guard-canary-threshold
+                    name count my/case-guard-canary-threshold
                     (mapconcat (lambda (l) (format "  %d: %s" (car l) (cdr l)))
                                (sort lines (lambda (a b) (< (car a) (car b))))
                                "\n"))))))))
 
 (defun org-case-check-files ()
-  "Print the damage report for every org file on disk under `ml-case-guard-directories'."
-  (dolist (dir ml-case-guard-directories)
+  "Print the damage report for every org file on disk under `my/case-guard-directories'."
+  (dolist (dir my/case-guard-directories)
     (dolist (f (directory-files-recursively dir "\\.org\\'"))
       (unless (string-match-p "/\\.stversions/\\|sync-conflict" f)
         (with-temp-buffer
@@ -45,7 +45,7 @@ Indirect buffers are skipped, because they share the text of their base buffer."
    (delq nil (mapcar (lambda (b)
                        (with-current-buffer b
                          (and (not (buffer-base-buffer))
-                              (ml-case-guard--file)
+                              (my/case-guard--file)
                               (org-case-check--report (buffer-name)))))
                      (buffer-list)))))
 
